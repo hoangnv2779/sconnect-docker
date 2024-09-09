@@ -2,21 +2,31 @@ FROM php:8.2-apache
 
 # Extensions PHP
 RUN apt-get update && apt-get install -y \
-        curl \
-        git \
-        libicu-dev \
-    && rm -rf /var/lib/apt/lists/* \
-    && docker-php-ext-install pdo_mysql intl
+    curl \
+    git \
+    libicu-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    libwebp-dev \
+    libzip-dev \
+    unzip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install pdo_mysql intl gd exif zip
 
 # Cài đặt Node.js và npm
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs
 
 # Cài đặt Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# Cài đặt và cấu hình Xdebug
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug
 
-COPY php.ini /usr/local/etc/php/
+# Tạo file cấu hình Xdebug
+COPY ./xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 # Conf apache
 RUN a2enmod rewrite
@@ -26,6 +36,7 @@ COPY vhost.conf /etc/apache2/sites-enabled/000-default.conf
 WORKDIR /var/www/html
 
 EXPOSE 80
+EXPOSE 65101
 
 #ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 

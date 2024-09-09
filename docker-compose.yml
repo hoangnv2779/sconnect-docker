@@ -1,14 +1,14 @@
-version: '3'
-
 services:
   proxy:
     image: traefik:v2.10
+    container_name: proxy
     command:
       - "--api.insecure=true"  # Giao diện quản lý tại http://localhost:8080
       - "--providers.docker=true"  # Kích hoạt Docker provider
       - "--entrypoints.web.address=:80"  # HTTP entrypoint trên cổng 80
       - "--log.level=DEBUG"  # Mức log là DEBUG
     networks:
+      - web
       - webgateway
     ports:
       - "80:80"
@@ -17,6 +17,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   asset:
+    container_name: asset
     build:
       context: asset/php-apache
     volumes:
@@ -25,31 +26,34 @@ services:
       - "8084:80"
     labels:
       - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:asset.local"
-      - "traefik.backend=user"
+      - "traefik.http.routers.eoffice.rule=Host(`asset.local`)"
+      - "traefik.http.services.eoffice.loadbalancer.server.port=80"
     networks:
       - webgateway
       - web
     restart: always
 
   eoffice:
-      build:
-        context: eOffice/php-apache
-      volumes:
-        - ../eOffice:/var/www/html
-      ports:
-        - "8085:80"
-      labels:
-        - "traefik.enable=true"
-        - "traefik.frontend.rule=Host:eOffice.local"
-        - "traefik.backend=user"
-      networks:
-        - my_network
-      restart: always
+    container_name: eoffice
+    build:
+      context: eOffice/php-apache
+    volumes:
+      - ../eOffice:/var/www/html
+    ports:
+      - "8083:80"
+      - "65101:65101" # Mở cổng cho Xdebug
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.eoffice.rule=Host(`eOffice.local`)"
+      - "traefik.http.services.eoffice.loadbalancer.server.port=80"
+    networks:
+      - webgateway
+      - web
+    restart: always
 
   db_office:
     image: mysql:latest
-    container_name: mysql-office
+    container_name: db_office
     environment:
       MYSQL_ROOT_PASSWORD: 'Office123#@!'
       MYSQL_DATABASE: eoffice
@@ -60,20 +64,8 @@ services:
     volumes:
       - db_data_office:/var/lib/mysql
     networks:
-      - my_network
-
-  db_asset:
-    image: mysql:latest
-    container_name: mysql-asset
-    environment:
-      MYSQL_ROOT_PASSWORD: 'Asset123#@!'
-      MYSQL_DATABASE:
-      MYSQL_USER: asset
-      MYSQL_PASSWORD: 'Asset123#@!'
-    ports:
-      - "3308:3306"
-    volumes:
-      - db_data_asset:/var/lib/mysql
+      - webgateway
+      - web
 
 volumes:
   db_data_office:
@@ -83,6 +75,5 @@ networks:
   webgateway:
     driver: bridge
   web:
-    external:
-      name: traefik_webgateway
-  my_network:
+    external: true
+    name: traefik_webgateway
