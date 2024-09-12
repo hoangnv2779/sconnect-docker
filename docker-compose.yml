@@ -26,12 +26,29 @@ services:
       - "8084:80"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.eoffice.rule=Host(`asset.local`)"
-      - "traefik.http.services.eoffice.loadbalancer.server.port=80"
+      - "traefik.http.routers.asset.rule=Host(`asset.local.test`)"
+      - "traefik.http.services.asset.loadbalancer.server.port=80"
     networks:
       - webgateway
       - web
     restart: always
+
+  server-sso:
+      container_name: server-sso
+      build:
+        context: server-sso/php-apache
+      volumes:
+        - ../server-sso:/var/www/html
+      ports:
+        - "8085:80"
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.server-sso.rule=Host(`sso.local.test`)"
+        - "traefik.http.services.server-sso.loadbalancer.server.port=80"
+      networks:
+        - webgateway
+        - web
+      restart: always
 
   eoffice:
     container_name: eoffice
@@ -41,7 +58,6 @@ services:
       - ../eOffice:/var/www/html
     ports:
       - "8083:80"
-      - "65101:65101" # Mở cổng cho Xdebug
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.eoffice.rule=Host(`eOffice.local`)"
@@ -63,6 +79,22 @@ services:
       - "3307:3306"
     volumes:
       - db_data_office:/var/lib/mysql
+    networks:
+      - webgateway
+      - web
+
+  db_asset:
+    image: mysql:latest
+    container_name: db_asset
+    environment:
+      MYSQL_ROOT_PASSWORD: 'Asset123#@!'
+      MYSQL_DATABASE: asset
+      MYSQL_USER: asset
+      MYSQL_PASSWORD: 'Asset123#@!'
+    ports:
+      - "3308:3306"
+    volumes:
+      - db_data_asset:/var/lib/mysql
     networks:
       - webgateway
       - web
