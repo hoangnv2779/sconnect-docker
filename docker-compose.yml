@@ -34,6 +34,8 @@ services:
     restart: always
 
   server-sso:
+
+
       container_name: server-sso
       build:
         context: server-sso/php-apache
