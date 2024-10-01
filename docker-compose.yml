@@ -51,39 +51,6 @@ services:
         - web
       restart: always
 
-  eoffice:
-    container_name: eoffice
-    build:
-      context: eOffice/php-apache
-    volumes:
-      - ../eOffice:/var/www/html
-    ports:
-      - "8083:80"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.eoffice.rule=Host(`eOffice.local`)"
-      - "traefik.http.services.eoffice.loadbalancer.server.port=80"
-    networks:
-      - webgateway
-      - web
-    restart: always
-
-  db_office:
-    image: mysql:latest
-    container_name: db_office
-    environment:
-      MYSQL_ROOT_PASSWORD: 'Office123#@!'
-      MYSQL_DATABASE: eoffice
-      MYSQL_USER: office
-      MYSQL_PASSWORD: 'Office123#@!'
-    ports:
-      - "3307:3306"
-    volumes:
-      - db_data_office:/var/lib/mysql
-    networks:
-      - webgateway
-      - web
-
   db_asset:
     image: mysql:latest
     container_name: db_asset
@@ -101,7 +68,6 @@ services:
       - web
 
 volumes:
-  db_data_office:
   db_data_asset:
 
 networks:

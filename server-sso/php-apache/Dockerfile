@@ -21,13 +21,6 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
 # Cài đặt Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Cài đặt và cấu hình Xdebug
-RUN pecl install xdebug \
-    && docker-php-ext-enable xdebug
-
-# Tạo file cấu hình Xdebug
-COPY ./xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
-
 # Conf apache
 RUN a2enmod rewrite
 COPY vhost.conf /etc/apache2/sites-enabled/000-default.conf
