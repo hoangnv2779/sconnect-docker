@@ -24,6 +24,7 @@ services:
       - ../asset:/var/www/html
     ports:
       - "8084:80"
+      - "9004:9004"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.asset.rule=Host(`asset.local.test`)"
@@ -34,8 +35,6 @@ services:
     restart: always
 
   server-sso:
-
-
       container_name: server-sso
       build:
         context: server-sso/php-apache
