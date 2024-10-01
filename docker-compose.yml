@@ -27,7 +27,7 @@ services:
       - "9004:9004"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.asset.rule=Host(`asset.local.test`)"
+      - "traefik.http.routers.asset.rule=Host(`dev.asset.com.vn`)"
       - "traefik.http.services.asset.loadbalancer.server.port=80"
     networks:
       - webgateway
