@@ -1,20 +1,20 @@
 services:
-  proxy:
-    image: traefik:v2.10
-    container_name: proxy
-    command:
-      - "--api.insecure=true"  # Giao diện quản lý tại http://localhost:8080
-      - "--providers.docker=true"  # Kích hoạt Docker provider
-      - "--entrypoints.web.address=:80"  # HTTP entrypoint trên cổng 80
-      - "--log.level=DEBUG"  # Mức log là DEBUG
-    networks:
-      - web
-      - webgateway
-    ports:
-      - "80:80"
-      - "8080:8080"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+  #  proxy:
+  #    image: traefik:v2.10
+  #    container_name: proxy
+  #    command:
+  #      - "--api.insecure=true"  # Giao diện quản lý tại http://localhost:8080
+  #      - "--providers.docker=true"  # Kích hoạt Docker provider
+  #      - "--entrypoints.web.address=:80"  # HTTP entrypoint trên cổng 80
+  #      - "--log.level=DEBUG"  # Mức log là DEBUG
+  #    networks:
+  #      - web
+  #      - webgateway
+  #    ports:
+  #      - "80:80"
+  #      - "8080:8080"
+  #    volumes:
+  #      - /var/run/docker.sock:/var/run/docker.sock
 
   asset:
     container_name: asset
@@ -34,55 +34,55 @@ services:
       - web
     restart: always
 
-  server-sso:
-      container_name: server-sso
-      build:
-        context: server-sso/php-apache
-      volumes:
-        - ../server-sso:/var/www/html
-      ports:
-        - "8085:80"
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.server-sso.rule=Host(`sso.local.test`)"
-        - "traefik.http.services.server-sso.loadbalancer.server.port=80"
-      networks:
-        - webgateway
-        - web
-      restart: always
+  #  server-sso:
+  #      container_name: server-sso
+  #      build:
+  #        context: server-sso/php-apache
+  #      volumes:
+  #        - ../server-sso:/var/www/html
+  #      ports:
+  #        - "8085:80"
+  #      labels:
+  #        - "traefik.enable=true"
+  #        - "traefik.http.routers.server-sso.rule=Host(`sso.local.test`)"
+  #        - "traefik.http.services.server-sso.loadbalancer.server.port=80"
+  #      networks:
+  #        - webgateway
+  #        - web
+  #      restart: always
 
-  eoffice:
-    container_name: eoffice
-    build:
-      context: eOffice/php-apache
-    volumes:
-      - ../eOffice:/var/www/html
-    ports:
-      - "8083:80"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.eoffice.rule=Host(`eOffice.local`)"
-      - "traefik.http.services.eoffice.loadbalancer.server.port=80"
-    networks:
-      - webgateway
-      - web
-    restart: always
+  #  eoffice:
+  #    container_name: eoffice
+  #    build:
+  #      context: eOffice/php-apache
+  #    volumes:
+  #      - ../eOffice:/var/www/html
+  #    ports:
+  #      - "8083:80"
+  #    labels:
+  #      - "traefik.enable=true"
+  #      - "traefik.http.routers.eoffice.rule=Host(`eOffice.local`)"
+  #      - "traefik.http.services.eoffice.loadbalancer.server.port=80"
+  #    networks:
+  #      - webgateway
+  #      - web
+  #    restart: always
 
-  db_office:
-    image: mysql:latest
-    container_name: db_office
-    environment:
-      MYSQL_ROOT_PASSWORD: 'Office123#@!'
-      MYSQL_DATABASE: eoffice
-      MYSQL_USER: office
-      MYSQL_PASSWORD: 'Office123#@!'
-    ports:
-      - "3307:3306"
-    volumes:
-      - db_data_office:/var/lib/mysql
-    networks:
-      - webgateway
-      - web
+  #  db_office:
+  #    image: mysql:latest
+  #    container_name: db_office
+  #    environment:
+  #      MYSQL_ROOT_PASSWORD: 'Office123#@!'
+  #      MYSQL_DATABASE: eoffice
+  #      MYSQL_USER: office
+  #      MYSQL_PASSWORD: 'Office123#@!'
+  #    ports:
+  #      - "3307:3306"
+  #    volumes:
+  #      - db_data_office:/var/lib/mysql
+  #    networks:
+  #      - webgateway
+  #      - web
 
   db_asset:
     image: mysql:latest
@@ -101,7 +101,7 @@ services:
       - web
 
 volumes:
-  db_data_office:
+  #  db_data_office:
   db_data_asset:
 
 networks:
