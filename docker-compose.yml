@@ -14,7 +14,6 @@ services:
       - "traefik.http.services.asset.loadbalancer.server.port=80"
     networks:
       - webgateway
-      - web
     restart: always
 
   db_asset:
@@ -31,7 +30,6 @@ services:
       - db_data_asset:/var/lib/mysql
     networks:
       - webgateway
-      - web
 
 volumes:
   db_data_asset:
@@ -39,6 +37,3 @@ volumes:
 networks:
   webgateway:
     driver: bridge
-  web:
-    external: true
-    name: traefik_webgateway
