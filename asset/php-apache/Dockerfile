@@ -7,11 +7,16 @@ RUN apt-get update && apt-get install -y \
         curl \
         git \
         libicu-dev \
+        nodejs \
+        npm \
     && docker-php-ext-install pdo_mysql intl \
     && rm -rf /var/lib/apt/lists/*
 
 # Cài đặt Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Cài đặt Yarn (nếu cần thiết)
+RUN npm install --global yarn
 
 # Copy file cấu hình PHP
 COPY php.ini /usr/local/etc/php/
@@ -24,6 +29,13 @@ COPY default.conf /etc/nginx/conf.d/default.conf
 
 # Copy source code vào container
 WORKDIR /var/www/html
+
+# Cài đặt các dependency npm (nếu cần)
+COPY package.json package-lock.json ./
+RUN npm install
+
+# Build ứng dụng (nếu cần)
+RUN npm run build
 
 # Expose cổng 80 để Nginx lắng nghe
 EXPOSE 80
