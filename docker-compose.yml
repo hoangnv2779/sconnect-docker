@@ -4,7 +4,7 @@ services:
     build:
       context: asset/php-apache
     volumes:
-      - ../asset:/var/www/html
+      - ../sconnect-asset:/var/www/html
     ports:
       - "8084:80"
       - "9004:9004"
