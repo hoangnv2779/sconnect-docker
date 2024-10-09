@@ -3,10 +3,15 @@ FROM php:8.1-fpm
 
 # Cài đặt các extensions và công cụ cần thiết
 RUN apt-get update && apt-get install -y \
-        nginx \
-        curl \
-        git \
-        libicu-dev \
+    nginx \
+    curl \
+    git \
+    libicu-dev \
+    libonig-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    && docker-php-ext-install pdo pdo_mysql intl \
     && rm -rf /var/lib/apt/lists/*
 
 # Cài đặt Node.js 20 và npm
