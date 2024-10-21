@@ -1,22 +1,47 @@
 version: '3'
 
 services:
-  asset:
-    container_name: asset
+#  asset:
+#    container_name: asset
+#    build:
+#      context: asset/php-apache
+#    volumes:
+#      # Chỉ mount các thư mục cần thiết để giảm overhead
+#      - ../sconnect-asset:/var/www/html:cached
+#      - ../sconnect-asset/storage:/var/www/html/storage
+#      - ../sconnect-asset/bootstrap/cache:/var/www/html/bootstrap/cache
+#    ports:
+#      - "80:80"
+#      - "443:443"
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.http.routers.asset.rule=Host(`asset.local.te st`)"
+#      - "traefik.http.services.asset.loadbalancer.server.port=80"
+#    networks:
+#      - webgateway
+#    restart: always
+#    # Giới hạn tài nguyên cho container để tránh việc tiêu tốn quá nhiều tài nguyên
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '1'
+#          memory: 1G
+
+  template:
+    container_name: template
     build:
-      context: asset/php-apache
+      context: template/php-apache
     volumes:
       # Chỉ mount các thư mục cần thiết để giảm overhead
-      - ../sconnect-asset:/var/www/html:cached
-      - ../sconnect-asset/storage:/var/www/html/storage
-      - ../sconnect-asset/bootstrap/cache:/var/www/html/bootstrap/cache
+      - ../template:/var/www/html:cached
+      - ../template/storage:/var/www/html/storage
+      - ../template/bootstrap/cache:/var/www/html/bootstrap/cache
     ports:
-      - "80:80"
-      - "443:443"
+      - "8081:80"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.asset.rule=Host(`asset.local.test`)"
-      - "traefik.http.services.asset.loadbalancer.server.port=80"
+      - "traefik.http.routers.template.rule=Host(`template.local.test`)"
+      - "traefik.http.services.template.loadbalancer.server.port=80"
     networks:
       - webgateway
     restart: always
@@ -26,6 +51,25 @@ services:
         limits:
           cpus: '1'
           memory: 1G
+
+  server-sso:
+    container_name: server-sso
+    build:
+      context: server-sso/php-apache
+    volumes:
+        # Chỉ mount các thư mục cần thiết để giảm overhead
+        - ../server-sso:/var/www/html:cached
+        - ../server-sso/storage:/var/www/html/storage
+        - ../server-sso/bootstrap/cache:/var/www/html/bootstrap/cache
+    ports:
+      - "8085:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.template.rule=Host(`template.local.test`)"
+      - "traefik.http.services.template.loadbalancer.server.port=80"
+    networks:
+      - webgateway
+    restart: always
 
   db_asset:
     image: mysql:latest
