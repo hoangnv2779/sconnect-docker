@@ -1,43 +1,42 @@
-FROM php:8.1-apache
+# Sử dụng image PHP với PHP-FPM
+FROM php:8.1-fpm
 
-# Extensions PHP
+# Cài đặt các extensions và công cụ cần thiết
 RUN apt-get update && apt-get install -y \
+    nginx \
     curl \
     git \
     libicu-dev \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    libpng-dev \
-    libwebp-dev \
+    libonig-dev \
     libzip-dev \
+    zip \
     unzip \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install pdo_mysql intl gd exif zip
+    && docker-php-ext-install pdo pdo_mysql intl \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && rm -rf /var/lib/apt/lists/*
 
-# Cài đặt Node.js và npm
+# Cài đặt Node.js 20 và npm
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs
 
 # Cài đặt Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Cài đặt và cấu hình Xdebug
-RUN pecl install xdebug \
-    && docker-php-ext-enable xdebug
+# Copy file cấu hình PHP
+COPY php.ini /usr/local/etc/php/
 
-# Tạo file cấu hình Xdebug
-COPY ./xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+# Copy file cấu hình Nginx
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Conf apache
-RUN a2enmod rewrite
-COPY vhost.conf /etc/apache2/sites-enabled/000-default.conf
-#COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+# Copy file vhost cấu hình Nginx
+COPY default.conf /etc/nginx/conf.d/default.conf
 
+# Copy source code vào container
 WORKDIR /var/www/html
 
+# Expose cổng 80 để Nginx lắng nghe
 EXPOSE 80
-EXPOSE 65101
 
-#ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-
-CMD ["apache2-foreground"]
+# Khởi động cả Nginx và PHP-FPM
+CMD service nginx start && php-fpm
