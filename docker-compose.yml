@@ -1,26 +1,6 @@
 version: '3'
 
 services:
-  proxy:
-    image: traefik:v2.10
-    container_name: proxy
-    command:
-      - "--api.insecure=true"  # Giao diện quản lý tại http://localhost:8080
-      - "--providers.docker=true"  # Kích hoạt Docker provider
-      - "--entrypoints.web.address=:80"  # HTTP entrypoint trên cổng 80
-      - "--log.level=INFO"  # Giảm mức ghi log để giảm tải hệ thống
-    ports:
-      - "80:80"  # HTTP
-      - "8080:8080"  # Giao diện quản lý của Traefik
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro  # Chỉ đọc để tránh quá tải I/O
-    networks:
-      - webgateway
-    labels:
-      - "traefik.http.middlewares.compress-middleware.compress=true"  # Middleware nén GZIP
-      - "traefik.http.routers.web.middlewares=compress-middleware"  # Áp dụng middleware cho entrypoint web
-
-
   asset:
     container_name: asset
     build:
@@ -45,50 +25,6 @@ services:
         limits:
           cpus: '1'
           memory: 1G
-
-  template:
-    container_name: template
-    build:
-      context: template/php-apache
-    volumes:
-      # Chỉ mount các thư mục cần thiết để giảm overhead
-      - ../template:/var/www/html:cached
-      - ../template/storage:/var/www/html/storage
-      - ../template/bootstrap/cache:/var/www/html/bootstrap/cache
-    ports:
-      - "8082:80"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.template.rule=Host(`template.local.test`)"
-      - "traefik.http.services.template.loadbalancer.server.port=80"
-    networks:
-      - webgateway
-    restart: always
-    # Giới hạn tài nguyên cho container để tránh việc tiêu tốn quá nhiều tài nguyên
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-
-  server-sso:
-    container_name: server-sso
-    build:
-      context: server-sso/php-apache
-    volumes:
-        # Chỉ mount các thư mục cần thiết để giảm overhead
-        - ../server-sso:/var/www/html:cached
-        - ../server-sso/storage:/var/www/html/storage
-        - ../server-sso/bootstrap/cache:/var/www/html/bootstrap/cache
-    ports:
-      - "8083:80"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.server-sso.rule=Host(`sso.local.test`)"
-      - "traefik.http.services.server-sso.loadbalancer.server.port=80"
-    networks:
-      - webgateway
-    restart: always
 
   db_asset:
     image: mysql:latest
