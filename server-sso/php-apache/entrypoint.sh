@@ -1,16 +1,15 @@
 #!/bin/bash
-
-# Dừng script nếu có lỗi
 set -e
 
-# Cài đặt các gói Composer
-#composer install
-#composer update
-# Cài đặt các gói npm
-#npm install
+# Change www-data's uid & guid to be the same as directory in host
+# Fix cache problems
+usermod -u `stat -c %u /var/www/html` www-data || true
+groupmod -g `stat -c %g /var/www/html` www-data || true
 
-# Chạy lệnh build (nếu cần)
-#npm run build
-
-# Khởi động Apache hoặc bất kỳ dịch vụ nào bạn cần
-apache2-foreground
+if [ "$1" = 'apache2-foreground' ]; then
+    # let's start as root
+    exec "$@"
+else
+    # change to user www-data
+    su www-data -s /bin/bash -c "$*"
+fi
