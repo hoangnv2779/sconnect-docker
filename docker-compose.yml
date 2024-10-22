@@ -20,7 +20,6 @@ services:
       - "traefik.http.middlewares.compress-middleware.compress=true"  # Middleware nén GZIP
       - "traefik.http.routers.web.middlewares=compress-middleware"  # Áp dụng middleware cho entrypoint web
 
-
   asset:
     container_name: asset
     build:
@@ -85,7 +84,6 @@ services:
         limits:
           cpus: '1'
           memory: 1G
-
 
   redis:
     image: redis:alpine
