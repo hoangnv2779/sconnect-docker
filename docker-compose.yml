@@ -20,41 +20,15 @@ services:
       - "traefik.http.middlewares.compress-middleware.compress=true"  # Middleware nén GZIP
       - "traefik.http.routers.web.middlewares=compress-middleware"  # Áp dụng middleware cho entrypoint web
 
-
-  asset:
-    container_name: asset
-    build:
-      context: asset/php-apache
-    volumes:
-      # Chỉ mount các thư mục cần thiết để giảm overhead
-      - ../sconnect-asset:/var/www/html:cached
-      - ../sconnect-asset/storage:/var/www/html/storage
-      - ../sconnect-asset/bootstrap/cache:/var/www/html/bootstrap/cache
-    ports:
-      - "8081:80"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.asset.rule=Host(`asset.local.test`)"
-      - "traefik.http.services.asset.loadbalancer.server.port=80"
-    networks:
-      - webgateway
-    restart: always
-    # Giới hạn tài nguyên cho container để tránh việc tiêu tốn quá nhiều tài nguyên
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-
   template:
-    container_name: template
+    container_name: sconnect-template
     build:
       context: template/php-apache
     volumes:
       # Chỉ mount các thư mục cần thiết để giảm overhead
-      - ../template:/var/www/html:cached
-      - ../template/storage:/var/www/html/storage
-      - ../template/bootstrap/cache:/var/www/html/bootstrap/cache
+      - ../sconnect-template:/var/www/html:cached
+      - ../sconnect-template/storage:/var/www/html/storage
+      - ../sconnect-template/bootstrap/cache:/var/www/html/bootstrap/cache
     ports:
       - "8082:80"
     labels:
@@ -90,18 +64,18 @@ services:
       - webgateway
     restart: always
 
-  db_asset:
+  db_template:
     image: mysql:latest
-    container_name: db_asset
+    container_name: db_template
     environment:
-      MYSQL_ROOT_PASSWORD: 'Asset123#@!'
-      MYSQL_DATABASE: asset
-      MYSQL_USER: asset
-      MYSQL_PASSWORD: 'Asset123#@!'
+      MYSQL_ROOT_PASSWORD: 'Template123#@!'
+      MYSQL_DATABASE: template
+      MYSQL_USER: template
+      MYSQL_PASSWORD: 'Template123#@!'
     ports:
       - "3308:3306"
     volumes:
-      - db_data_asset:/var/lib/mysql
+      - db_data_template:/var/lib/mysql
     networks:
       - webgateway
     restart: always
@@ -111,6 +85,26 @@ services:
           cpus: '1'
           memory: 1G
 
+  db_sso:
+    image: mysql:latest
+    container_name: db_sso
+    environment:
+      MYSQL_ROOT_PASSWORD: 'Sso123#@!'
+      MYSQL_DATABASE: sso
+      MYSQL_USER: sso
+      MYSQL_PASSWORD: 'Sso123#@!'
+    ports:
+      - "3309:3306"
+    volumes:
+      - db_data_sso:/var/lib/mysql
+    networks:
+      - webgateway
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
 
   redis:
     image: redis:alpine
@@ -121,7 +115,8 @@ services:
       - webgateway
 
 volumes:
-  db_data_asset:
+  db_data_template:
+  db_data_sso:
 
 networks:
   webgateway:
