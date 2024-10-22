@@ -46,31 +46,6 @@ services:
           cpus: '1'
           memory: 1G
 
-  template:
-    container_name: template
-    build:
-      context: template/php-apache
-    volumes:
-      # Chỉ mount các thư mục cần thiết để giảm overhead
-      - ../template:/var/www/html:cached
-      - ../template/storage:/var/www/html/storage
-      - ../template/bootstrap/cache:/var/www/html/bootstrap/cache
-    ports:
-      - "8082:80"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.template.rule=Host(`template.local.test`)"
-      - "traefik.http.services.template.loadbalancer.server.port=80"
-    networks:
-      - webgateway
-    restart: always
-    # Giới hạn tài nguyên cho container để tránh việc tiêu tốn quá nhiều tài nguyên
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-
   server-sso:
     container_name: server-sso
     build:
